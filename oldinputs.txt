@@ -1,0 +1,90 @@
+.model small
+.stack 100h
+.data
+Color db 0Fh
+.code
+
+main proc
+	MOV AH, 0       ;set video mode
+	MOV AL, 13h		;chosing the option for video mode
+	INT 10h			;execute config
+	
+	;objective 1
+	;resetting the mouse
+	
+	MOV AX, 0   ;mouse in
+	INT 33h
+	
+	MOV AX, 1		;showing mouse pointer
+	INT 33h
+
+CALL LeftCLickCheck	
+
+	
+
+	MOV AH, 4Ch
+	INT 21h
+	
+	
+
+;objective 2
+LeftCLickCheck:
+	PUSH AX
+	PUSH BX
+	PUSH CX
+	PUSH DX
+	
+	loop1:
+	MOV AH, 01h
+	INT 16h
+	cmp AX, 0
+	JNE keycheck 
+	mouseread:
+	MOV AX, 03h
+	INT 33h
+	cmp BX, 1ss
+	JNE loop1 
+	
+
+	
+	
+	SHR CX, 1
+	MOV AH, 0Ch  ;set config to create pixel
+	MOV AL, Color	 ;white color
+	MOV BH, 00h	 ;set page nm
+	INT 10h		 ;execute
+	SUB CX, 1
+	SUB DX, 1
+	INT 10h
+	
+	ADD CX, 2
+	ADD DX, 2
+	INT 10h
+	JMP loop1
+	
+	keycheck:
+	cmp AX, 7800h
+	
+	
+	JE ColorChange
+	JMP mouseread
+	
+	;Objective 3
+	ColorChange:
+	MOV AH, 01h
+	INT 16h
+	MOV AL, 0AH   ;green color
+	MOV [Color], AL
+	MOV AH, 0ch		;clear buffer
+	INT 21h
+	JMP mouseread
+	
+	POP DX
+	POP CX
+	POP BX
+	POP AX
+RET
+
+
+main endp
+end main
